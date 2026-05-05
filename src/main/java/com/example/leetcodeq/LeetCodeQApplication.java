@@ -5,66 +5,100 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.HashMap;
 /*
-3. Longest Substring Without Repeating Characters
-Solved
-Medium
+4. Median of Two Sorted Arrays
+Hard
 Topics
 premium lock icon
 Companies
-Hint
-Given a string s, find the length of the longest substring without duplicate characters.
+Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.
+
+The overall run time complexity should be O(log (m+n)).
 
 
 
 Example 1:
 
-Input: s = "abcabcbb"
-Output: 3
-Explanation: The answer is "abc", with the length of 3. Note that "bca" and "cab" are also correct answers.
+Input: nums1 = [1,3], nums2 = [2]
+Output: 2.00000
+Explanation: merged array = [1,2,3] and median is 2.
 Example 2:
 
-Input: s = "bbbbb"
-Output: 1
-Explanation: The answer is "b", with the length of 1.
-Example 3:
-
-Input: s = "pwwkew"
-Output: 3
-Explanation: The answer is "wke", with the length of 3.
-Notice that the answer must be a substring, "pwke" is a subsequence and not a substring.
+Input: nums1 = [1,2], nums2 = [3,4]
+Output: 2.50000
+Explanation: merged array = [1,2,3,4] and median is (2 + 3) / 2 = 2.5.
 
 
 Constraints:
 
-0 <= s.length <= 5 * 104
+nums1.length == m
+nums2.length == n
+0 <= m <= 1000
+0 <= n <= 1000
+1 <= m + n <= 2000
+-106 <= nums1[i], nums2[i] <= 106
  */
 @SpringBootApplication
 public class LeetCodeQApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(LeetCodeQApplication.class, args);
-        int count = lengthOfLongestSubstring("abcabcbb");
-        System.out.println(count);
+        int[] firstArray = new int[]{1, 2, 3, 4, 5};
+        int[] secondArray = new int[]{7, 8, 9, 10};
+        double res = findMedianSortedArrays(firstArray, secondArray);
+        System.out.println(res);
     }
 
-    public static int lengthOfLongestSubstring(String s) {
-            HashMap<Character, Integer> map = new HashMap<>();
+    public static double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        // Always binary search the smaller array
+        if (nums1.length > nums2.length) {
+            return findMedianSortedArrays(nums2, nums1);
+        }
 
-            int strat = 0;
-            int maxLength = 0;
+        int A = nums1.length;
+        int B = nums2.length;
 
-            for (int right = 0; right < s.length(); right++) {
-                char current = s.charAt(right);
+        int low = 0, high = A;
 
-                if (map.containsKey(current)) {
-                    strat = Math.max(strat, map.get(current) + 1);
+        while (low <= high) {
+            int i = (low + high) / 2;              // partition in nums1
+            int j = (A + B + 1) / 2 - i;          // partition in nums2
+
+            int maxLeftA = (i == 0) ? Integer.MIN_VALUE : nums1[i - 1];
+            int minRightA = (i == A) ? Integer.MAX_VALUE : nums1[i];
+
+            int maxLeftB = (j == 0) ? Integer.MIN_VALUE : nums2[j - 1];
+            int minRightB = (j == B) ? Integer.MAX_VALUE : nums2[j];
+
+            // correct partition found
+            if (maxLeftA <= minRightB && maxLeftB <= minRightA) {
+
+                // even total length
+                if ((A + B) % 2 == 0) {
+                    return (
+                            Math.max(maxLeftA, maxLeftB) +
+                                    Math.min(minRightA, minRightB)
+                    ) / 2.0;
                 }
-
-                map.put(current, right);
-                maxLength = Math.max(maxLength, right - strat + 1);
+                // odd total length
+                else {
+                    return Math.max(maxLeftA, maxLeftB);
+                }
             }
 
-            return maxLength;
+            // too far right in nums1 → move left
+            else if (maxLeftA > minRightB) {
+                high = i - 1;
+            }
+            // too far left in nums1 → move right
+            else {
+                low = i + 1;
+            }
+            ;
         }
+        return 0.0;
+    }
 }
+
+
+
 
